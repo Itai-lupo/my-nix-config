@@ -22,10 +22,13 @@
 	timezone = "Asia/Jerusalem";
 	bootMode = "uefi";
 	bootMountPath = "/boot";
+	dotfilePath = "/persist/settings/etc/nixos/";
+	secretsPath = "./secrets/";
       };
 
       userSettings = rec {
         username = "itai";
+	name = "itai lupo";
 	email = "itailupo@gmail.com";
 	dotfiles = ""; # need to set
 	wm = "kde6";
@@ -46,6 +49,7 @@
                 ]; # load configuration.nix from selected PROFILE
               specialArgs = {
                 # pass config variables from above
+		inherit self;
                 inherit systemSettings;
                 inherit userSettings;
                 inherit inputs;
