@@ -4,6 +4,8 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+
+      # system settings:
       ../../system/users.nix
       ../../system/boot/clean-on-boot.nix
       ../../system/boot/systemd-boot.nix
@@ -11,6 +13,9 @@
       ../../system/hardware/networking.nix
       ../../system/hardware/sound.nix
       ../../system/wm/kde6.nix
+     
+      # system apps:
+        ../../system/app/tmux.nix        
     ];
 
   nixpkgs.config.allowUnfree = true;
@@ -39,12 +44,21 @@
      fzf
      fishPlugins.grc
      grc
-
+     tree
    ];
 
  
   programs.fish.enable = true;
   users.defaultUserShell = pkgs.fish;
+
+  services.dbus = {
+    enable = true;
+    packages = [ pkgs.dconf ];
+  };
+
+  programs.dconf = {
+    enable = true;
+  };
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 

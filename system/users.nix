@@ -8,10 +8,6 @@
      isNormalUser = true;
      description = userSettings.name;
      extraGroups = [ "wheel" "input" "dialout" "networkmanager" ];
-     packages = with pkgs; [
-       brave
-       tree
-     ];
      uid = 1000;
   };
 }

@@ -2,18 +2,19 @@
   description = "A very basic flake";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    nixpkgs-stable.url = "nixpkgs/nixos-23.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    home-manager-unstable.url = "github:nix-community/home-manager/master";
-    home-manager-unstable.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager.url = "github:nix-community/home-manager/master";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
-    home-manager-stable.url = "github:nix-community/home-manager/release-23.11";
-    home-manager-stable.inputs.nixpkgs.follows = "nixpkgs-stable";
+
+     # Neovim
+    nixvim.url = "github:nix-community/nixvim";
+    nixvim.inputs.nixpkgs.follows = "nixpkgs";
   };
 
 
-  outputs = { self, nixpkgs, ... }@inputs: 
+  outputs = { nixpkgs, home-manager, ... }@inputs: 
     let
       systemSettings = {
 	system = "x86_64-linux";
@@ -45,15 +46,26 @@
          nixosConfigurations.default = nixpkgs.lib.nixosSystem {
               modules = [
                   (./. + "/profiles" + ("/" + systemSettings.profile) + "/configuration.nix")
-		  inputs.home-manager-unstable.nixosModules.default
-                ]; # load configuration.nix from selected PROFILE
+		   home-manager.nixosModules.home-manager
+                   {
+                     home-manager.useGlobalPkgs = true;
+                     home-manager.useUserPackages = true;
+                     home-manager.users.${userSettings.username} = import  (./. + "/profiles" + ("/" + systemSettings.profile) + "/home.nix");
+		     home-manager.extraSpecialArgs = {
+		       inherit systemSettings;
+                       inherit userSettings;
+                       inherit inputs;
+		     };
+                   }
+                ];
+
               specialArgs = {
                 # pass config variables from above
-		inherit self;
                 inherit systemSettings;
                 inherit userSettings;
                 inherit inputs;
              };
-        };
+
+	           };
        };
 }
