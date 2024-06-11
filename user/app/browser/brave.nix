@@ -1,15 +1,24 @@
-{ pkgs, ...}:
+{ pkgs, ... }:
 
 {
-  # Module installing brave as default browser
-  home.packages = [ pkgs.brave ];
+  programs.brave = {
+    enable = true;
+    package = pkgs.brave;
+    extensions = [
+    ];
+    commandLineArgs = [
+      "--disable-features=WebRtcAllowInputVolumeAdjustment"
+      "--enable-features=UseOzonePlatform,ForceDarkMode --ozone-platform=wayland"
+      "--force-dark-mode='Enabled with selective inversion of non-image elements'"
+    ];
+  };
 
   xdg.mimeApps.defaultApplications = {
-  "text/html" = "brave-browser.desktop";
-  "x-scheme-handler/http" = "brave-browser.desktop";
-  "x-scheme-handler/https" = "brave-browser.desktop";
-  "x-scheme-handler/about" = "brave-browser.desktop";
-  "x-scheme-handler/unknown" = "brave-browser.desktop";
+    "text/html" = "brave-browser.desktop";
+    "x-scheme-handler/http" = "brave-browser.desktop";
+    "x-scheme-handler/https" = "brave-browser.desktop";
+    "x-scheme-handler/about" = "brave-browser.desktop";
+    "x-scheme-handler/unknown" = "brave-browser.desktop";
   };
 
   home.sessionVariables = {

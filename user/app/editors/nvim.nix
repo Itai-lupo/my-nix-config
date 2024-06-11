@@ -1,12 +1,15 @@
-{ pkgs, ...}:
+{ pkgs, ... }:
 
 {
- 
+  home.packages = [
+    pkgs.ripgrep
+  ];
+
   programs.nixvim = {
     enable = true;
 
     # Theme
-    colorschemes.tokyonight.enable = true;
+    #    colorschemes.tokyonight.enable = true;
 
     # Settings
     opts = {
@@ -15,13 +18,38 @@
       smartindent = true;
       tabstop = 2;
       number = true;
+      relativenumber = true;
       clipboard = "unnamedplus";
     };
 
-    # Keymaps
-    globals = {
-      mapleader = " ";
+    keymaps = [
+      {
+        action = "<cmd>Telescope live_grep<CR>";
+        key = "<leader>fs";
+      }
+      {
+        action = "<cmd>NvimTreeToggle<CR>";
+        key = "<leader>e";
+      }
+      {
+        action = "<cmd>Telescope find_files<CR>";
+        key = "<leader>ff";
+      }
+      {
+        action = "<cmd>Man <C-r><C-w> <CR>";
+        key = "<leader>g";
+      }
+
+    ];
+
+    highlight = {
+      Comment.fg = "#ff00ff";
+      Comment.bg = "#000000";
+      Comment.underline = true;
+      Comment.bold = true;
     };
+
+    globals.mapleader = " ";
 
     plugins = {
 
@@ -31,17 +59,6 @@
       treesitter.enable = true;
       which-key = {
         enable = true;
-      };
-      noice = {
-        # WARNING: This is considered experimental feature, but provides nice UX
-        enable = true;
-        presets = {
-          bottom_search = true;
-          command_palette = true;
-          long_message_to_split = true;
-          #inc_rename = false;
-          #lsp_doc_border = false;
-        };
       };
       telescope = {
         enable = true;
@@ -60,6 +77,21 @@
         };
       };
 
+
+      undotree = {
+        enable = true;
+
+      };
+
+      nvim-tree = {
+        enable = true;
+        openOnSetup = true;
+      };
+      cmp = {
+        enable = true;
+        autoEnableSources = true;
+      };
+
       # Dev
       lsp = {
         enable = true;
@@ -67,6 +99,10 @@
           hls.enable = true;
           marksman.enable = true;
           nil_ls.enable = true;
+          lua-ls = {
+            enable = true;
+            settings.telemetry.enable = false;
+          };
           rust-analyzer = {
             enable = true;
             installCargo = false;
@@ -75,5 +111,13 @@
         };
       };
     };
+
+    extraPlugins = with pkgs.vimPlugins; [
+      {
+        plugin = comment-nvim;
+        config = "lua require(\"Comment\").setup()";
+      }
+    ];
+
   };
 }

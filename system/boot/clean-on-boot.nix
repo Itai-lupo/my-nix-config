@@ -1,6 +1,9 @@
-{ self, lib, pkgs, ...}:
+{ lib, ... }:
 
 {
+
+  boot.supportedFilesystems = [ "btrfs" ];
+
   environment.etc = {
     nixos.source = "/persist/settings/etc/nixos";
     adjtime.source = "/persist/settings/etc/adjtime";
@@ -8,19 +11,19 @@
     machine-id.source = "/persist/settings/etc/machine-id";
   };
 
-   systemd.tmpfiles.rules = [];
+  systemd.tmpfiles.rules = [ ];
 
-   security.sudo.extraConfig = ''
+  security.sudo.extraConfig = ''
     # rollback results in sudo lectures after each reboot
     Defaults lecture = never
   '';
 
- boot.initrd.postDeviceCommands = pkgs.lib.mkBefore ''
-    mkdir -p /mnt
 
+  boot.initrd.postDeviceCommands = lib.mkAfter ''
+    mkdir -p /mnt
     # We first mount the btrfs root to /mnt
     # so we can manipulate btrfs subvolumes.
-    mount -o subvol=/ /dev/nvme1n1p1 /mnt
+    mount -o subvol=/ /dev/nvme0n1p3 /mnt
 
     # While we're tempted to just delete /root and create
     # a new snapshot from /root-blank, /root is already
@@ -40,8 +43,8 @@
     btrfs subvolume list -o /mnt/root |
     cut -f9 -d' ' |
     while read subvolume; do
-      echo "deleting /$subvolume subvolume..."
-      btrfs subvolume delete "/mnt/$subvolume"
+    echo "deleting /$subvolume subvolume..."
+    btrfs subvolume delete "/mnt/$subvolume"
     done &&
     echo "deleting /root subvolume..." &&
     btrfs subvolume delete /mnt/root

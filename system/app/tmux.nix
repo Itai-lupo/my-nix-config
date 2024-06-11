@@ -1,4 +1,4 @@
-{ pkgs, config, lib, ...}:
+{ pkgs, config, lib, ... }:
 {
   programs.tmux = {
     enable = true;
@@ -16,7 +16,7 @@
       tmuxPlugins.urlview
       tmuxPlugins.sidebar
       tmuxPlugins.sensible
-      
+
     ];
 
     keyMode = "vi";
