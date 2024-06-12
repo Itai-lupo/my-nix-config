@@ -41,7 +41,7 @@
     in
     [
       brave
-
+      spotube
       spotify
       obsidian
       vscode
@@ -80,5 +80,12 @@
       ];
     };
 
+  home.persistence."/persist/dotfile/spotube" = {
+      
+    allowOther = true;
+    directories = [
+      ".local/share/spotube/"
+    ];
+    };
   home.stateVersion = "23.11";
 }
