@@ -18,7 +18,7 @@
     ../../user/app/shell/bash.nix
     ../../user/app/shell/tmux.nix
     ../../user/app/editors/nvim.nix
-
+    ../../user/app/games/steam.nix
 
     ../../user/wm/${systemSettings.wm}/${systemSettings.wm}.nix
 
@@ -80,12 +80,15 @@
       ];
     };
 
-  home.persistence."/persist/dotfile/spotube" = {
-      
+
+  home.persistence."/persist/dotfiles/spotube" = {
+    removePrefixDirectory = false;
     allowOther = true;
+
     directories = [
-      ".local/share/spotube/"
+      ".local/share/spotube"
     ];
-    };
+  };
+
   home.stateVersion = "23.11";
 }

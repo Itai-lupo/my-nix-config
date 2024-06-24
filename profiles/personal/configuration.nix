@@ -1,4 +1,4 @@
-{ pkgs, systemSettings, userSettings, ... }:
+{ pkgs, systemSettings, userSettings, myutils, ... }:
 
 {
   imports =
@@ -7,12 +7,12 @@
       ./hardware-configuration.nix
 
       # system settings:
-      ../../system/users.nix
+      ../../system/security/users.nix
       ../../system/maintenance/auto-update.nix
       ../../system/maintenance/auto-gc.nix
       ../../system/boot/clean-on-boot.nix
       ../../system/boot/systemd-boot.nix
-      ../../system/hardware/opengl.nix
+      ../../system/hardware/opengl_${systemSettings.gpuType}.nix
       ../../system/hardware/networking.nix
       ../../system/hardware/sound.nix
       ../../system/wm/${systemSettings.wm}.nix
@@ -21,6 +21,8 @@
       # system apps:
       ../../system/app/tmux.nix
       ../../system/app/docker.nix
+      ../../system/app/games/steam.nix
+
 
       ../../system/containers/browsers/brave.nix
 
@@ -35,28 +37,18 @@
 
 
   # Configure keymap in X11
-  services.xserver.xkb.layout = "us";
-  services.xserver.xkb.options = "eurosign:e,caps:escape";
+  services.xserver.xkb = {
+    layout = "us";
+    options = "eurosign:e,caps:escape";
+  };
+
+  services.ratbagd.enable = true;
+  services.hardware.openrgb.enable = true;
+
+
 
   environment.systemPackages =
-    let
-      containerName = "braveContainer";
-      braveLauncher = pkgs.writeScriptBin "${containerName}-launcher" ''
-        #!${pkgs.stdenv.shell}
-        set -euo pipefail
-
-        if [[ "$(systemctl is-active container@${containerName}.service)" != "active" ]]; then
-            systemctl start container@${containerName}.service
-            machinectl shell ${userSettings.username}@${containerName} /usr/bin/env bash --login -c "exec ${pkgs.brave}/bin/brave --enable-features=UseOzonePlatform --ozone-platform=wayland"
-            machinectl kill ${containerName} 
-        else
-            machinectl shell ${userSettings.username}@${containerName} /usr/bin/env bash --login -c "exec ${pkgs.brave}/bin/brave --enable-features=UseOzonePlatform --ozone-platform=wayland"
-        fi
-
-      '';
-    in
     with pkgs; [
-      braveLauncher
       wget
       neovim
       tmux
@@ -73,6 +65,18 @@
       tree
       moreutils
       killall
+      piper
+      liquidctl
+
+      (myutils.mkContainerPackage
+      {
+        inherit pkgs;
+        inherit (userSettings) username;
+        containerName = "braveContainer";
+        appToLaunch = "exec ${pkgs.brave}/bin/brave --enable-features=UseOzonePlatform --ozone-platform=wayland";
+      })
+
+
     ];
 
 
@@ -87,6 +91,7 @@
   programs.dconf = {
     enable = true;
   };
+
   programs.fuse.userAllowOther = true;
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];

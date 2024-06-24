@@ -24,4 +24,20 @@
   home.sessionVariables = {
     DEFAULT_BROWSER = "${pkgs.brave}/bin/brave";
   };
+
+  home.packages = with pkgs;
+    let
+      brave = makeDesktopItem {
+        name = "BraveBrowser";
+        desktopName = "Brave Browser";
+        exec = "braveContainer-launcher";
+        icon = "brave-browser";
+        comment = "run brave inside a container";
+        genericName = "Desktop application to manage brave.";
+        categories = [ "Network" "WebBrowser" ];
+      };
+    in
+    [
+      brave
+    ];
 }

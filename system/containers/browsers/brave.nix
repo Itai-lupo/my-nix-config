@@ -1,6 +1,27 @@
-{ config, userSettings, pkgs, inputs, lib, ... }:
+{ config, userSettings, pkgs, inputs, lib, myutils, ... }:
 
 {
+
+
+  environment.systemPackages =
+    let
+      containerName = "braveContainer";
+      braveLauncher = pkgs.writeScriptBin "${containerName}-launcher" ''
+          #!${pkgs.stdenv.shell}
+          set -euo pipefail
+        if [[ "$(systemctl is-active container@${containerName}.service)" != "active" ]]; then
+            systemctl start container@${containerName}.service
+              machinectl shell ${userSettings.username}@${containerName} /usr/bin/env bash --login -c "exec ${pkgs.brave}/bin/brave --enable-features=UseOzonePlatform --ozone-platform=wayland"
+              machinectl kill ${containerName} 
+          else
+              machinectl shell ${userSettings.username}@${containerName} /usr/bin/env bash --login -c "exec ${pkgs.brave}/bin/brave --enable-features=UseOzonePlatform --ozone-platform=wayland"
+          fi
+
+      '';
+    in
+    [ braveLauncher ];
+
+
   containers.braveContainer =
     let
       hostCfg = config;

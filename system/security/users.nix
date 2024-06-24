@@ -7,7 +7,7 @@
     hashedPassword = lib.strings.fileContents /${systemSettings.dotfilePath}/${systemSettings.secretsPath}/passwords/${userSettings.username};
     isNormalUser = true;
     description = userSettings.name;
-    extraGroups = [ "wheel" "input" "dialout" "networkmanager" "docker" "kvm" "libvirtd" ];
+    extraGroups = [ "wheel" "input" "dialout" "networkmanager" "docker" "kvm" "libvirtd" "gamemode" "video" ];
     uid = 1000;
   };
 }

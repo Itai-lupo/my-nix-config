@@ -28,6 +28,7 @@
         secretsPath = "./secrets/";
         wm = "kde";
         wmType = "wayland";
+        gpuType = "amd";
       };
 
       userSettings = rec {
@@ -40,6 +41,8 @@
         editor = "nvim";
         spawnEditor = "exec " + term + " -e " + editor;
       };
+
+      myutils = import ./utils/main.nix;
     in
     {
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixpkgs-fmt;
@@ -58,6 +61,7 @@
               inherit systemSettings;
               inherit userSettings;
               inherit inputs;
+              inherit myutils;
             };
           }
         ];
@@ -67,6 +71,7 @@
           inherit systemSettings;
           inherit userSettings;
           inherit inputs;
+          inherit myutils;
         };
 
       };

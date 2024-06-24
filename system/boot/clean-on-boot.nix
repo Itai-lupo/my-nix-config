@@ -23,6 +23,7 @@
     mkdir -p /mnt
     # We first mount the btrfs root to /mnt
     # so we can manipulate btrfs subvolumes.
+    mount -o subvol=/ /dev/nvme1n1p3 /mnt
     mount -o subvol=/ /dev/nvme0n1p3 /mnt
 
     # While we're tempted to just delete /root and create

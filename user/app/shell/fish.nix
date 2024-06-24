@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ ... }:
 
 {
   programs.fish = {
@@ -8,5 +8,12 @@
       vim = "nvim";
 
     };
+  };
+
+
+  home.persistence."/persist/dotfiles/fish" = {
+    files = [
+      ".local/share/fish/fish_history"
+    ];
   };
 }
