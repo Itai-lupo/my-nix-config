@@ -1,7 +1,7 @@
-{ config, userSettings, pkgs, inputs, lib, myutils, ... }:
+{ config, userSettings, pkgs, inputs, lib, ... }:
 
 {
-
+  imports = [ ./test.nix ];
 
   environment.systemPackages =
     let
@@ -64,9 +64,9 @@
           (import "${inputs.home-manager}/nixos")
         ];
 
-        hardware.opengl = {
+        hardware.graphics = {
           enable = true;
-          extraPackages = hostCfg.hardware.opengl.extraPackages;
+          extraPackages = hostCfg.hardware.graphics.extraPackages;
         };
 
         environment.systemPackages = with pkgs; [

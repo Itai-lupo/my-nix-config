@@ -1,4 +1,4 @@
-{ pkgs, systemSettings, userSettings, myutils, ... }:
+{ pkgs, systemSettings, ... }:
 
 {
   imports =
@@ -20,7 +20,6 @@
 
       # system apps:
       ../../system/app/tmux.nix
-      ../../system/app/docker.nix
       ../../system/app/games/steam.nix
 
 
@@ -68,13 +67,7 @@
       piper
       liquidctl
 
-      (myutils.mkContainerPackage
-      {
-        inherit pkgs;
-        inherit (userSettings) username;
-        containerName = "braveContainer";
-        appToLaunch = "exec ${pkgs.brave}/bin/brave --enable-features=UseOzonePlatform --ozone-platform=wayland";
-      })
+
 
 
     ];

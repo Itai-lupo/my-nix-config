@@ -1,9 +1,8 @@
 { pkgs, ... }:
 {
-  hardware.opengl = {
+  hardware.graphics = {
     enable = true;
-    driSupport = true;
-    driSupport32Bit = true; # For 32 bit applications
+    enable32Bit = true;
 
     extraPackages = with pkgs; [
       rocmPackages.clr.icd
@@ -11,11 +10,12 @@
     ];
 
     # For 32 bit applications 
-    #extraPackages32 = with pkgs; [
-    #driversi686Linux.amdvlk
-    #];
+    extraPackages32 = with pkgs; [
+    driversi686Linux.amdvlk
+    ];
   };
 
   services.xserver.videoDrivers = [ "amdgpu" ];
 
 }
+
