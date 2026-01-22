@@ -15,15 +15,17 @@
       ../../system/hardware/opengl_${systemSettings.gpuType}.nix
       ../../system/hardware/networking.nix
       ../../system/hardware/sound.nix
+      ../../system/hardware/bluetooth.nix
       ../../system/wm/${systemSettings.wm}.nix
       ../../system/wm/fonts.nix
 
       # system apps:
       ../../system/app/tmux.nix
-      ../../system/app/games/steam.nix
+       ../../system/app/games/steam.nix
 
 
       ../../system/containers/browsers/brave.nix
+      ../../system/containers/games/steam.nix
 
     ];
 
@@ -43,6 +45,16 @@
 
   services.ratbagd.enable = true;
   services.hardware.openrgb.enable = true;
+
+  services.blueman.enable = true;
+
+  systemd.user.services.mpris-proxy = {
+    description = "Mpris proxy";
+    after = [ "network.target" "sound.target" ];
+    wantedBy = [ "default.target" ];
+    serviceConfig.ExecStart = "${pkgs.bluez}/bin/mpris-proxy";
+  };
+
 
 
 
@@ -66,13 +78,27 @@
       killall
       piper
       liquidctl
+      man-pages-posix
+      man-pages
 
+      lua-language-server
+      nixd
+      bash-language-server
+      ruff
+      pyright
+      dockerfile-language-server-nodejs
 
+      bambu-studio
 
-
+      ryzen-monitor-ng
     ];
 
-
+  documentation.dev.enable = true;
+  documentation.man = {
+    # In order to enable to mandoc man-db has to be disabled.
+    man-db.enable = false;
+    mandoc.enable = true;
+  };
   programs.fish.enable = true;
   users.defaultUserShell = pkgs.fish;
 

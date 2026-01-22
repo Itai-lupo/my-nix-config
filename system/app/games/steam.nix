@@ -1,16 +1,22 @@
 { userSettings, pkgs, ... }:
 
 {
-  programs.steam = {
-    enable = true;
-    gamescopeSession.enable = true;
-  };
-
-
   environment.systemPackages = with pkgs; [
     mangohud
-    protonup
+    protonup-ng
   ];
 
   programs.gamemode.enable = true;
+
+  programs = {
+          gamescope = {
+            enable = true;
+            capSysNice = true;
+          };
+          steam = {
+            enable = true;
+            gamescopeSession.enable = true;
+          };
+        };
+
 }

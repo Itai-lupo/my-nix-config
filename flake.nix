@@ -1,5 +1,5 @@
 {
-  description = "A very basic flake";
+  description = "my system setup";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -9,9 +9,6 @@
 
     impermanence.url = "github:nix-community/impermanence";
 
-    # Neovim
-    nixvim.url = "github:nix-community/nixvim";
-    nixvim.inputs.nixpkgs.follows = "nixpkgs";
   };
 
 
@@ -49,7 +46,6 @@
 
       nixosConfigurations.${systemSettings.hostname} = nixpkgs.lib.nixosSystem {
         modules = [
-          (./. + "/profiles" + ("/" + systemSettings.profile) + "/configuration.nix")
           impermanence.nixosModules.impermanence
           home-manager.nixosModules.home-manager
           {
@@ -64,6 +60,7 @@
               inherit myutils;
             };
           }
+          (./. + "/profiles" + ("/" + systemSettings.profile) + "/configuration.nix")
         ];
 
         specialArgs = {

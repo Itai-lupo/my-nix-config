@@ -9,11 +9,11 @@ let
             set -euo pipefail
 
             if [[ "$(systemctl is-active container@${containerName}.service)" != "active" ]]; then
-                systemctl start container@${containerName}.service
-                machinectl shell ${username}@${containerName} /usr/bin/env bash --login -c "${appToLaunch}"
-                machinectl kill ${containerName} 
+                sudo systemctl start container@${containerName}.service
+                sudo machinectl shell ${username}@${containerName} /usr/bin/env bash --login -c "${appToLaunch}"
+                sudo machinectl kill ${containerName} 
             else
-                machinectl shell ${username}@${containerName} /usr/bin/env bash --login -c "${appToLaunch}"
+                sudo machinectl shell ${username}@${containerName} /usr/bin/env bash --login -c "${appToLaunch}"
             fi
   
           '';

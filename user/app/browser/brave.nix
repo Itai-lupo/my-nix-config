@@ -30,7 +30,7 @@
       brave = makeDesktopItem {
         name = "BraveBrowser";
         desktopName = "Brave Browser";
-        exec = "braveContainer-launcher";
+        exec = "run0 braveContainer-launcher";
         icon = "brave-browser";
         comment = "run brave inside a container";
         genericName = "Desktop application to manage brave.";

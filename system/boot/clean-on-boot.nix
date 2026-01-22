@@ -11,7 +11,17 @@
     machine-id.source = "/persist/settings/etc/machine-id";
   };
 
-  systemd.tmpfiles.rules = [ ];
+  environment.persistence."/persist" =
+    {
+      hideMounts = true;
+      directories = [
+        "/var/lib/nixos"
+        "/var/lib/bluetooth"
+      ];
+    };
+
+  systemd.tmpfiles.rules = [
+  ];
 
   security.sudo.extraConfig = ''
     # rollback results in sudo lectures after each reboot

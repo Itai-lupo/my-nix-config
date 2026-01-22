@@ -14,6 +14,8 @@ _:
       data-root = "/persist/dotfiles/docker/";
     };
 
+    enableOnBoot = false;
+
   };
 
   virtualisation.oci-containers.backend = "docker";

@@ -66,11 +66,6 @@
 
       which-key = {
         enable = true;
-        registrations = {
-          "<leader>fg" = "Find Git files with telescope";
-          "<leader>fw" = "Find text with telescope";
-          "<leader>ff" = "Find files with telescope";
-        };
       };
 
       telescope = {
@@ -207,7 +202,6 @@
       alpha = {
         enable = true;
         theme = "dashboard";
-        iconsEnabled = true;
       };
 
 

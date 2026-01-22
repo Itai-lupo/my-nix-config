@@ -1,25 +1,6 @@
-{ config, userSettings, pkgs, inputs, lib, ... }:
-
+{ config, inputs, lib, userSettings, pkgs, ... }:
 {
-  imports = [ ./test.nix ];
-
-  environment.systemPackages =
-    let
-      containerName = "braveContainer";
-      braveLauncher = pkgs.writeScriptBin "${containerName}-launcher" ''
-          #!${pkgs.stdenv.shell}
-          set -euo pipefail
-        if [[ "$(systemctl is-active container@${containerName}.service)" != "active" ]]; then
-            systemctl start container@${containerName}.service
-              machinectl shell ${userSettings.username}@${containerName} /usr/bin/env bash --login -c "exec ${pkgs.brave}/bin/brave --enable-features=UseOzonePlatform --ozone-platform=wayland"
-              machinectl kill ${containerName} 
-          else
-              machinectl shell ${userSettings.username}@${containerName} /usr/bin/env bash --login -c "exec ${pkgs.brave}/bin/brave --enable-features=UseOzonePlatform --ozone-platform=wayland"
-          fi
-
-      '';
-    in
-    [ braveLauncher ];
+  imports = [ ./braveRunner.nix ];
 
 
   containers.braveContainer =
@@ -31,17 +12,26 @@
     in
     {
       ephemeral = true;
-      #      autoStart = true;
+      restartIfChanged = true;
+      privateNetwork = false;
+      hostAddress = "192.168.10.45";
+      localAddress = "192.168.10.42/24";
+      hostBridge = "br0";
+      allowedDevices = [
+        {
+          modifier = "rwm";
+          node = "/dev/dri/card1";
+        }
+        {
+          modifier = "rwm";
+          node = "/dev/dri/renderD128";
+        }
+      ];
+      tmpfs = [ "/var" "/tmp" ];
 
       bindMounts = {
         waylandSocket = rec {
           hostPath = "/run/user/${toString userUid}/";
-          mountPoint = hostPath;
-          #          isReadOnly = false;
-        };
-
-        dri = rec {
-          hostPath = "/dev/dri";
           mountPoint = hostPath;
         };
 
@@ -60,8 +50,12 @@
       };
 
       config = {
+
+        boot.isContainer = true;
+
         imports = [
           (import "${inputs.home-manager}/nixos")
+          ../../wm/fonts.nix
         ];
 
         hardware.graphics = {
@@ -76,19 +70,26 @@
         networking = {
           firewall = {
             enable = true;
-            allowedTCPPorts = [ 80 ];
+            allowedTCPPorts = [ 80 443 8080 ];
+            allowedUDPPorts = [ ];
           };
+          defaultGateway = "192.168.10.1";
+          nameservers = [ "192.168.10.1" ];
           # Use systemd-resolved inside the container
           # Workaround for bug https://github.com/NixOS/nixpkgs/issues/162686
           useHostResolvConf = lib.mkForce false;
         };
 
+        security.sudo.enable = false;
+
         services.resolved.enable = true;
+
         system.stateVersion = "23.11";
+
         users.users.${userSettings.username} = {
           isNormalUser = true;
           description = userSettings.name;
-          extraGroups = [ "input" "dialout" "networkmanager" ];
+          extraGroups = [ "input" "dialout" "video" "render" ];
           uid = 1000;
         };
 
