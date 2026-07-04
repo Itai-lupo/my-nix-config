@@ -11,7 +11,7 @@
   };
 
 
-  home.persistence."/persist/dotfiles/fish" = {
+  home.persistence."/persist/dotfiles/home_persistence/" = {
     files = [
       ".local/share/fish/fish_history"
     ];

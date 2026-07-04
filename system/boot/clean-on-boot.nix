@@ -1,9 +1,28 @@
-{ lib, ... }:
+{ lib, pkgs, ... }:
 
 {
 
   boot.supportedFilesystems = [ "btrfs" ];
+  boot.kernelParams = [
+    "nvme_core.default_ps_max_latency_us=0"
+    "pcie_aspm=off"
+    "systemd.debug_shell=1"
+  ];
 
+  boot.initrd.availableKernelModules = [
+    "nvme"
+    "nvme_core"
+    "btrfs"
+    "amdgpu"
+    "pci_hyperv"
+    "ahci"
+    "xhci_pci"
+    "vfat"
+    "nls_cp437"
+    "nls_iso8859_1"
+    "usbhid"
+  ];
+  boot.initrd.systemd.settings.Manager.DefaultTimeoutStartSec = "20s";
   environment.etc = {
     nixos.source = "/persist/settings/etc/nixos";
     adjtime.source = "/persist/settings/etc/adjtime";
@@ -28,43 +47,71 @@
     Defaults lecture = never
   '';
 
+  boot.initrd.systemd.initrdBin = with pkgs; [
+    util-linux
+    btrfs-progs
+    coreutils
+  ];
 
-  boot.initrd.postDeviceCommands = lib.mkAfter ''
-    mkdir -p /mnt
-    # We first mount the btrfs root to /mnt
-    # so we can manipulate btrfs subvolumes.
-    mount -o subvol=/ /dev/nvme1n1p3 /mnt
-    mount -o subvol=/ /dev/nvme0n1p3 /mnt
-
-    # While we're tempted to just delete /root and create
-    # a new snapshot from /root-blank, /root is already
-    # populated at this point with a number of subvolumes,
-    # which makes `btrfs subvolume delete` fail.
-    # So, we remove them first.
-    #
-    # /root contains subvolumes:
-    # - /root/var/lib/portables
-    # - /root/var/lib/machines
-    #
-    # I suspect these are related to systemd-nspawn, but
-    # since I don't use it I'm not 100% sure.
-    # Anyhow, deleting these subvolumes hasn't resulted
-    # in any issues so far, except for fairly
-    # benign-looking errors from systemd-tmpfiles.
-    btrfs subvolume list -o /mnt/root |
-    cut -f9 -d' ' |
-    while read subvolume; do
-    echo "deleting /$subvolume subvolume..."
-    btrfs subvolume delete "/mnt/$subvolume"
-    done &&
-    echo "deleting /root subvolume..." &&
-    btrfs subvolume delete /mnt/root
-
-    echo "restoring blank /root subvolume..."
-    btrfs subvolume snapshot /mnt/root-blank /mnt/root
-
-    # Once we're done rolling back to a blank snapshot,
-    # we can unmount /mnt and continue on the boot process.
-    umount /mnt
+  boot.initrd.services.udev.binPackages = [ pkgs.btrfs-progs ];
+  boot.initrd.services.udev.rules = ''
+    ACTION=="add|change", SUBSYSTEM=="block", ENV{ID_FS_TYPE}=="btrfs", RUN+="${pkgs.btrfs-progs}/bin/btrfs device scan"
   '';
+
+
+  boot.initrd.systemd.services.rollback = {
+    description = "Rollback Btrfs root subvolume to a pristine state";
+    wantedBy = [ "initrd.target" ];
+    unitConfig.RequiresMountsFor = [ "/dev/disk/by-uuid/28c813c2-69a5-45ca-b48a-3d7defbead5a" ];
+    after = [ "dev-disk-by\\xuuid-28c813c2\\x2d69a5\\x2d45ca\\x2db48a\\x2d3d7defbead5a.device" ];
+    requires = [ "dev-disk-by\\x2duuid-28c813c2\\x2d69a5\\x2d45ca\\x2db48a\\x2d3d7defbead5a.device" ];
+    before = [ "sysroot.mount" ];
+
+    unitConfig.DefaultDependencies = "no";
+
+    serviceConfig.Type = "oneshot";
+
+    path = with pkgs; [ btrfs-progs util-linux coreutils ];
+    script = ''
+
+    DEVICE="/dev/disk/by-uuid/28c813c2-69a5-45ca-b48a-3d7defbead5a"
+    
+    echo "Waiting for $DEVICE..."
+    for i in {1..20}; do
+      if [ -e "$DEVICE" ]; then
+        echo "Device found!"
+        break
+      fi
+      echo "Still waiting... ($i)"
+      sleep 0.5
+    done
+
+    if [ ! -e "$DEVICE" ]; then
+      echo "ERROR: Device never appeared. Dropping to shell."
+      exit 1
+    fi
+      echo "Starting Btrfs rollback..."
+      mkdir -p /mnt-root
+      ls /dev/
+
+      /bin/mount -t btrfs -o subvol=/ /dev/disk/by-uuid/28c813c2-69a5-45ca-b48a-3d7defbead5a /mnt-root
+
+      if [ -e /mnt-root/root ]; then
+          echo "Cleaning up existing /root subvolume..."
+          btrfs subvolume list -o /mnt-root/root | cut -f9 -d' ' | while read subvolume; do
+              echo "Deleting subvolume /$subvolume..."
+              ${pkgs.btrfs-progs}/bin/btrfs subvolume delete "/mnt-root/$subvolume"
+          done
+          ${pkgs.btrfs-progs}/bin/btrfs subvolume delete /mnt-root/root
+      fi
+
+      echo "Restoring /root from root-blank..."
+      btrfs subvolume snapshot /mnt-root/root-blank /mnt-root/root
+
+      /bin/umount /mnt-root
+      rmdir /mnt-root
+      echo "Btrfs rollback completed successfully."
+    '';
+  };
+
 }

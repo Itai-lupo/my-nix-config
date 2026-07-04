@@ -14,6 +14,8 @@
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
 
+  services.fstrim.enable = true;
+
   fileSystems."/" =
     {
       device = "/dev/disk/by-uuid/28c813c2-69a5-45ca-b48a-3d7defbead5a";
@@ -43,6 +45,13 @@
       neededForBoot = true;
     };
 
+  fileSystems."/mnt/backup" =
+    {
+      device = "/dev/sda1";
+      fsType = "btrfs";
+      options = [ "compress=zstd:1" "noatime" "noexec" "nodev" "nosuid" "space_cache=v2" "discard=async" ]; #"noauto" "x-systemd.automount" "x-systemd.idle-timeout=10mi" ];
+    };
+
   fileSystems."/boot" =
     {
       device = "/dev/disk/by-uuid/2660-12E5";
@@ -63,6 +72,6 @@
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
-  nix.settings.max-jobs = lib.mkDefault 8;
+  nix.settings.max-jobs = lib.mkDefault 16;
   console.font = lib.mkDefault "${pkgs.terminus_font}/share/consolefonts/ter-u28n.psf.gz";
 }

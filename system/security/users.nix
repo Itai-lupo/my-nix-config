@@ -11,7 +11,13 @@
     uid = 1000;
   };
 
-  security.sudo.execWheelOnly = true;
+  security.sudo.enable = false;
+  security.sudo-rs.enable = true;
+  security.sudo-rs.extraConfig = ''
+    Defaults env_keep += "PATH TERM NIX_PATH SSH_AUTH_SOCK"
+  '';
+
+  security.sudo-rs.execWheelOnly = true;
 
   security.pam.services.systemd-run0 = { };
 

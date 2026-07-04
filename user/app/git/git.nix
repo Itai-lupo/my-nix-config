@@ -3,13 +3,16 @@
 {
   home.packages = [ pkgs.git ];
   programs.git.enable = true;
-  programs.git.userName = userSettings.name;
-  programs.git.userEmail = userSettings.email;
-  programs.git.extraConfig = {
+  programs.git.settings.user = {
+    name = userSettings.name;
+    email = userSettings.email;
+  };
+
+  programs.git.settings.extraConfig = {
     init.defaultBranch = "master";
   };
 
-  home.persistence."/persist/dotfiles" = {
+  home.persistence."/persist/dotfiles/home_persistence/" = {
     files = [
       ".ssh/id_ed25519.pub"
       ".ssh/id_ed25519"

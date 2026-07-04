@@ -1,7 +1,6 @@
+{ lib, ... }:
 {
-  home.persistence."/persist/dotfiles/Plasma" = {
-    removePrefixDirectory = false;
-    allowOther = true;
+  home.persistence."/persist/dotfiles/home_persistence/" = {
     directories = [
       ".config/baloo" # fuse mounted from /nix/dotfiles/Plasma/.config/gtk-3.0
       ".config/gtk-3.0" # fuse mounted from /nix/dotfiles/Plasma/.config/gtk-3.0
@@ -12,7 +11,6 @@
       ".config/kwlletd"
       ".config/knewstuff3"
       ".config/plasma-manager"
-      ".config/KDE"
       ".config/kactivitymanagerd"
       ".config/konsole"
       ".config/KDE"
@@ -42,7 +40,10 @@
       ".local/share/systemsettings"
       ".local/share/wallpapers"
 
+      ".local/share/plasmalogin"
+
     ];
+
     files = [
       ".config/akregatorrc"
       ".config/baloofileinformationrc"

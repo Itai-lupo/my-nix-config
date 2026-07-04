@@ -1,5 +1,4 @@
-{ pkgs, userSettings, systemSettings, inputs, ... }:
-
+{ pkgs, userSettings, systemSettings, lib, ... }:
 {
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
@@ -9,17 +8,15 @@
   programs.home-manager.enable = true;
 
   imports = [
-    (import "${inputs.impermanence}/home-manager.nix")
-
     ../../user/app/browser/brave.nix
     ../../user/app/git/git.nix
     ../../user/app/shell/fish.nix
     ../../user/app/shell/bash.nix
     ../../user/app/shell/tmux.nix
-        ../../user/app/games/steam.nix
+    ../../user/app/games/steam.nix
+    ../../user/app/ai/aider.nix
 
     ../../user/wm/${systemSettings.wm}/${systemSettings.wm}.nix
-
   ];
 
   # The home.packages option allows you to install Nix packages into your
@@ -32,22 +29,8 @@
       vscode
       ripgrep
 
+      litellm
     ]);
-
-  # Home Manager is pretty good at managing dotfiles. The primary way to manage
-  # plain files is through 'home.file'.
-  home.file = {
-    # # Building this configuration will create a copy of 'dotfiles/screenrc' in
-    # # the Nix store. Activating the configuration will then make '~/.screenrc' a
-    # # symlink to the Nix store copy.
-    # ".screenrc".source = dotfiles/screenrc;
-
-    # # You can also set the file content immediately.
-    # ".gradle/gradle.properties".text = ''
-    #   org.gradle.console=verbose
-    #   org.gradle.daemon.idletimeout=3600000
-    # '';
-  };
 
 
   home.sessionVariables = {
@@ -55,9 +38,9 @@
     MANPAGER = "nvim +Man!";
   };
 
-  home.persistence."/persist" =
+  home.persistence."/persist/" =
     {
-      files = [
+      directories = [
         "Downloads"
         "Music"
         "Pictures"
@@ -68,28 +51,24 @@
     };
 
 
-  home.persistence."/persist/dotfiles/spotube" = {
-    removePrefixDirectory = false;
-    allowOther = true;
-
+  home.persistence."/persist/dotfiles/home_persistence/" = {
     directories = [
       ".local/share/spotube"
-    ];
-  };
-
-  home.persistence."/persist/dotfiles/spotify" = {
-    removePrefixDirectory = false;
-    allowOther = true;
-    directories = [ ".config/spotify" ];
-  };
-
-  home.persistence."/persist/dotfiles/nvim" = {
-    removePrefixDirectory = false;
-    allowOther = true;
-    directories = [
+      ".config/spotify"
       ".config/nvim"
+      ".config/direnv"
+      ".local/share/direnv"
     ];
   };
 
-  home.stateVersion = "23.11";
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+  };
+  programs.starship = {
+    enable = true;
+  };
+
+
+  home.stateVersion = "26.05";
 }

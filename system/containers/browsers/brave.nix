@@ -30,9 +30,19 @@
       tmpfs = [ "/var" "/tmp" ];
 
       bindMounts = {
+        # this is more then just wayland, it also has pipewire and 
+        # other importent gui sockets
+        # note this is way I can't make it a sudoles container 
+        # I need to know the final uid and it needs to be able to read the main user files
         waylandSocket = rec {
           hostPath = "/run/user/${toString userUid}/";
           mountPoint = hostPath;
+        };
+
+        dri = {
+          hostPath = "/dev/dri/";
+          mountPoint = "/dev/dri/";
+          isReadOnly = false;
         };
 
         braveConfig = {
@@ -47,6 +57,8 @@
           mountPoint = "/home/${userSettings.username}/Downloads/";
           isReadOnly = false;
         };
+
+        gpuDrivers = { hostPath = "/run/opengl-driver"; mountPoint = "/run/opengl-driver"; isReadOnly = false; };
       };
 
       config = {

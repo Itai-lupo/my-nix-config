@@ -24,8 +24,5 @@
     aggressiveResize = true;
 
     extraConfig = lib.strings.fileContents ./tmux-extra.conf;
-
-
-
   };
 }

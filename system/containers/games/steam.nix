@@ -11,7 +11,7 @@
       inherit userSettings;
     in
     {
-      ephemeral = true;
+      # ephemeral = true;
       restartIfChanged = true;
       privateNetwork = false;
       hostAddress = "192.168.10.45";
@@ -41,6 +41,11 @@
           isReadOnly = false;
         };
 
+        dri = {
+          hostPath = "/dev/dri/";
+          mountPoint = "/dev/dri/";
+          isReadOnly = false;
+        };
 
         games = {
           hostPath = "/persist/Games/";
@@ -48,6 +53,16 @@
           isReadOnly = false;
         };
       };
+      additionalCapabilities = [
+        "CAP_SYS_ADMIN"
+        "CAP_SYS_PTRACE"
+        "CAP_SYS_CHROOT"
+        "CAP_SETUID"
+        "CAP_SETGID"
+
+      ];
+
+
 
       config = {
 
@@ -123,7 +138,7 @@
 
           users.${userSettings.username} = {
             home.username = userSettings.username;
-            home.stateVersion = "23.11";
+            home.stateVersion = "26.05";
 
             programs.bash.enable = true;
 
@@ -140,6 +155,8 @@
               _JAVA_OPTIONS = "-Dawt.useSystemAAFontSettings=lcd";
               XDG_RUNTIME_DIR = "/run/user/${toString userUid}";
               DISPLAY = ":0";
+              STEAM_DISABLE_SANDBOX = "1";
+              STEAM_RUNTIME = 0;
             };
           };
         };
@@ -160,5 +177,9 @@
       };
     };
 
-
+  systemd.services."container@steam-container".serviceConfig = {
+    SystemCallFilter = ""; # Wipes the 5 seccomp filters entirely
+    NoNewPrivileges = "no"; # Permits capset changes inside the sandbox
+    CapabilityBoundingSet = "~"; # Gives the container permission to hold the caps you assigned
+  };
 }

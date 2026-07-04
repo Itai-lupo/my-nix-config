@@ -1,9 +1,7 @@
 { ... }:
 
 {
-  home.persistence."/persist/dotfiles/steam" = {
-    removePrefixDirectory = false;
-    allowOther = true;
+  home.persistence."/persist/dotfiles/home_persistence/" = {
     directories = [
       ".local/share/Steam/"
     ];

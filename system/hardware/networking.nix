@@ -15,10 +15,9 @@
     #firewall.interfaces."br0".allowedTCPPorts = [ 80 443 8080 57621 4070];
     #firewall.interfaces."br0".allowedUDPPorts = [ 5353 ];
 
-    useDHCP = false;
-    #interfaces."br0".useDHCP = true;
-    defaultGateway = "192.168.10.1";
-    nameservers = [ "192.168.10.1" ];
+    interfaces."enp8s0".useDHCP = true;
+    #defaultGateway = "192.168.10.1";
+    #nameservers = [ "192.168.10.1" ];
 
     # Lazy IPv6 connectivity for the container
     enableIPv6 = false;
